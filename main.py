@@ -4,6 +4,10 @@ from math import radians, sin, cos, pi
 from numpy import arange
 
 
+def lerp(start: float, stop: float, percent: float):
+    return (stop - start) * percent + start
+
+
 class Circle:
     def __init__(self, pos: Vector2, radius: int, mod: int) -> None:
         self.radius = radius
@@ -15,23 +19,41 @@ class Circle:
                 radius * cos(i) + self.rect.centerx,
                 radius * sin(i) + self.rect.centery,
             )
-            for i in arange(0, 2 * pi, 2 * pi / 360)
+            for i in arange(0, 2 * pi, 2 * pi / 100)
         ]
         self.time_delay_from_drawn = 90
+        self.color_fade: list[Color] = [
+            Color(
+                int(lerp(0, 150, i / len(self.points))),
+                int(lerp(0, 150, i / len(self.points))),
+                int(lerp(50, 200, i / len(self.points))),
+            )
+            for i in range(len(self.points))
+        ]
 
     def animate(self, screen: Surface):
         if self.frame < 90:
             pygame.draw.arc(
-                screen, Color("white"), self.rect, 0, radians(self.frame * 4)
+                screen,
+                self.color_fade[len(self.color_fade) // 2],
+                self.rect,
+                0,
+                radians(self.frame * 4),
             )
         else:
-            pygame.draw.circle(screen, Color("white"), self.rect.center, self.radius, 1)
+            pygame.draw.circle(
+                screen,
+                self.color_fade[len(self.color_fade) // 2],
+                self.rect.center,
+                self.radius,
+                1,
+            )
             for nth_point in range(
                 min((self.frame - self.time_delay_from_drawn), len(self.points))
             ):
                 pygame.draw.aaline(
                     screen,
-                    Color("white"),
+                    self.color_fade[nth_point],
                     self.points[nth_point],
                     self.points[(nth_point * self.mod) % len(self.points)],
                 )
