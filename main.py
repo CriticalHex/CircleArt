@@ -15,13 +15,15 @@ class Circle:
                 radius * cos(i) + self.rect.centerx,
                 radius * sin(i) + self.rect.centery,
             )
-            for i in arange(0, 2 * pi, 2 * pi / 100)
+            for i in arange(0, 2 * pi, 2 * pi / 360)
         ]
-        self.time_delay_from_drawn = 360
+        self.time_delay_from_drawn = 90
 
     def animate(self, screen: Surface):
-        if self.frame < 360:
-            pygame.draw.arc(screen, Color("white"), self.rect, 0, radians(self.frame))
+        if self.frame < 90:
+            pygame.draw.arc(
+                screen, Color("white"), self.rect, 0, radians(self.frame * 4)
+            )
         else:
             pygame.draw.circle(screen, Color("white"), self.rect.center, self.radius, 1)
             for nth_point in range(
@@ -43,15 +45,24 @@ def main():
     running = True
     clock = pygame.time.Clock()
 
+    width = 10
+    height = 5
     top_border = 5
-    radius = screen.get_height() / 20 - (2 * top_border)
+    side_border = 5
+    radius = min(
+        screen.get_height() / (height * 2) - (2 * top_border),
+        screen.get_width() / (width * 2) - (2 * side_border),
+    )
     diameter = radius * 2
-    spacing = (screen.get_height() - (10 * diameter)) / 10
+    spacing = max(
+        (screen.get_height() - (height * diameter)) / height,
+        (screen.get_width() - (width * diameter)) / width,
+    )
     center = Vector2(screen.get_width() / 2, screen.get_height() / 2)
     circles: list[Circle] = []
-    start = Vector2(center.x - (5 * radius) - (2 * spacing), top_border)
-    for i in range(10):
-        for j in range(5):
+    start = Vector2(center.x - (width * radius) - (2 * spacing), top_border)
+    for i in range(height):
+        for j in range(width):
             circles.append(
                 Circle(
                     start
@@ -59,12 +70,12 @@ def main():
                         diameter * j + (j * spacing), diameter * i + (i * spacing)
                     ),
                     radius,
-                    (i * 5) + j + 2,
+                    (i * width) + j + 2,
                 )
             )
 
     while running:
-        # clock.tick(60)
+        clock.tick(30)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
